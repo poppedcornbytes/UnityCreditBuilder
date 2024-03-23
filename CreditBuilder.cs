@@ -7,20 +7,16 @@ using UnityEditor;
 public class CreditBuilder : MonoBehaviour
 {
     [SerializeField]
-    private VisualElement rootElement;
+    private VisualElement _rootElement;
     [SerializeField]
-    private UIDocument rootDocument;
+    private UIDocument _rootDocument;
     [SerializeField]
-    private BackgroundGenerator backgroundGenerator;
+    private BackgroundGenerator _backgroundGenerator;
     private void OnEnable()
     {
-        rootElement = rootDocument.rootVisualElement;
-        VisualElement background = new VisualElement();
-        background.style.height = Length.Percent(100);
-        background.style.width = Length.Percent(100);
-        background.style.position = Position.Absolute;
-        background.style.backgroundColor = new StyleColor(backgroundGenerator.BackgroundColour);
-        rootElement.Add(background);
+        _rootElement = _rootDocument.rootVisualElement;
+        VisualElement creditBackground = _backgroundGenerator.GenerateCreditBackground();
+        _rootElement.Add(creditBackground);
     }
     // Start is called before the first frame update
     void Start()
@@ -39,21 +35,24 @@ public class CreditBuilder : MonoBehaviour
 [CanEditMultipleObjects]
 public class BackgroundGeneratorEditor : Editor
 {
-    SerializedProperty backgroundGenerator;
-    SerializedProperty _fillTypeProperty;
-    SerializedProperty _backgroundColorProperty;
-    SerializedProperty _backgroundImageProperty;
+    private SerializedProperty _rootDocumentProperty;
+    private SerializedProperty _backgroundGeneratorProperty;
+    private SerializedProperty _fillTypeProperty;
+    private SerializedProperty _backgroundColorProperty;
+    private SerializedProperty _backgroundImageProperty;
     private void OnEnable()
     {
-        backgroundGenerator = serializedObject.FindProperty("backgroundGenerator");
-        _fillTypeProperty = backgroundGenerator.FindPropertyRelative("_fillType");
-        _backgroundColorProperty = backgroundGenerator.FindPropertyRelative("_backgroundColour");
-        _backgroundImageProperty = backgroundGenerator.FindPropertyRelative("_backgroundImage");
+        _rootDocumentProperty = serializedObject.FindProperty("_rootDocument");
+        _backgroundGeneratorProperty = serializedObject.FindProperty("_backgroundGenerator");
+        _fillTypeProperty = _backgroundGeneratorProperty.FindPropertyRelative("_fillType");
+        _backgroundColorProperty = _backgroundGeneratorProperty.FindPropertyRelative("_backgroundColour");
+        _backgroundImageProperty = _backgroundGeneratorProperty.FindPropertyRelative("_backgroundImage");
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
+        EditorGUILayout.PropertyField(_rootDocumentProperty);
         EditorGUILayout.PropertyField(_fillTypeProperty);
         BackgroundFillType selectedFillType = (BackgroundFillType)_fillTypeProperty.intValue;
         if (selectedFillType == BackgroundFillType.Colour)
